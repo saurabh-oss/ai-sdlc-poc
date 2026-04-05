@@ -1,0 +1,48 @@
+# .claudeignore - Files Claude Code MUST NOT read, modify, or reference
+
+# Infrastructure & Pipeline (read-only context only)
+Jenkinsfile
+docker-compose.yml
+docker-compose.*.yml
+monitoring/**
+grafana/**
+
+# Secrets & Environment
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Other developer workspaces
+../workspace-dev2/**
+
+# Git internals
+.git/**
+
+# Build artifacts (do not modify)
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Dependencies (managed by Poetry/pip)
+.venv/
+venv/
+node_modules/
+
+# Agent-generated reports (read-only)
+reports/**
+
+# CI configuration
+.github/**
+jenkins/**

@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Poetry
+poetry.lock   # intentionally NOT gitignored - keep for reproducibility
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+reports/htmlcov/
+reports/junit.xml
+reports/coverage.json
+
+# Linting
+.mypy_cache/
+.flake8
+
+# Secrets - NEVER commit these
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+secrets/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Reports (generated at runtime - not versioned)
+reports/*.json
+reports/*.txt
+reports/*.md
+!reports/.gitkeep
+
+# Claude audit log (local only)
+.claude/audit.log

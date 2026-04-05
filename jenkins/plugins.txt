@@ -1,0 +1,16 @@
+build-timeout:latest
+cloudbees-folder:latest
+configuration-as-code:latest
+credentials-binding:latest
+generic-webhook-trigger:latest
+git:latest
+gitea:latest
+junit:latest
+pipeline-build-step:latest
+pipeline-graph-analysis:latest
+pipeline-stage-view:latest
+prometheus:latest
+timestamper:latest
+workflow-aggregator:latest
+workflow-job:latest
+ws-cleanup:latest

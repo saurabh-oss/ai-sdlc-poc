@@ -1,0 +1,38 @@
+# .cursorignore - Cursor AI must not index or modify these files
+
+# Pipeline & infrastructure
+Jenkinsfile
+docker-compose.yml
+monitoring/
+grafana/
+jenkins/
+
+# Secrets
+.env
+.env.local
+.env.production
+secrets/
+*.pem
+*.key
+
+# Other dev workspace
+../workspace-dev1/
+
+# Build output
+dist/
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Deps
+.venv/
+node_modules/
+
+# Git
+.git/
+
+# Agent reports (read-only)
+reports/

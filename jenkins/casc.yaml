@@ -1,0 +1,52 @@
+jenkins:
+  systemMessage: "AI-Governed SDLC - Jenkins CI/CD Server"
+  numExecutors: 4
+  mode: NORMAL
+  scmCheckoutRetryCount: 2
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "admin123"
+        - id: "dev1"
+          password: "dev1pass"
+        - id: "dev2"
+          password: "dev2pass"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8080/"
+    adminAddress: "admin@company.local"
+
+  prometheusConfiguration:
+    collectingMetricsPeriodInSeconds: 15
+    defaultNamespace: "jenkins"
+    path: "prometheus"
+    useAuthenticatedEndpoint: false
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "gitea-admin"
+              username: "gitadmin"
+              password: "Admin@1234!"
+              description: "Gitea admin credentials"
+          - string:
+              scope: GLOBAL
+              id: "anthropic-api-key"
+              secret: "${ANTHROPIC_API_KEY}"
+              description: "Anthropic API key for AI agents"
+          - string:
+              scope: GLOBAL
+              id: "pushgateway-url"
+              secret: "http://pushgateway:9091"
+              description: "Prometheus Pushgateway URL"

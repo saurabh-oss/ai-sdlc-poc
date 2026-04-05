@@ -1,0 +1,2 @@
+This directory holds runtime-generated reports (Semgrep, Trufflehog, coverage, AI review).
+These files are .gitignored - this placeholder keeps the directory tracked.

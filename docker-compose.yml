@@ -1,0 +1,128 @@
+networks:
+  ai-sdlc-net:
+    driver: bridge
+
+volumes:
+  gitea-data:
+  jenkins-data:
+  prometheus-data:
+  loki-data:
+  grafana-data:
+
+services:
+
+  gitea-server:
+    image: gitea/gitea:1.21
+    container_name: gitea-server
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=sqlite3
+      - GITEA__server__ROOT_URL=http://localhost:3000/
+      - GITEA__webhook__ALLOWED_HOST_LIST=jenkins-server
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    volumes:
+      - gitea-data:/data
+    networks:
+      - ai-sdlc-net
+    restart: unless-stopped
+
+  jenkins-server:
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    container_name: jenkins-server
+    privileged: true
+    user: "0"
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./jenkins/casc.yaml:/var/jenkins_home/casc.yaml:ro
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    networks:
+      - ai-sdlc-net
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    container_name: prometheus
+    user: "0:0"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.enable-remote-write-receiver'
+    networks:
+      - ai-sdlc-net
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    user: "0:0"
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - ai-sdlc-net
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    user: "0:0"
+    volumes:
+      - ./monitoring/promtail/config.yml:/etc/promtail/config.yaml
+      - jenkins-data:/var/jenkins_home:ro
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - ai-sdlc-net
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.3.0
+    container_name: grafana
+    user: "0:0"
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - ai-sdlc-net
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+  pushgateway:
+    image: prom/pushgateway:v1.7.0
+    container_name: pushgateway
+    user: "0:0"
+    ports:
+      - "9091:9091"
+    networks:
+      - ai-sdlc-net
+    restart: unless-stopped

@@ -1,0 +1,132 @@
+# .cursorrules - AI Coding Guardrails for Developer 2 (Cursor AI)
+# Cursor reads this file to understand project rules and context.
+
+## Project Context
+This is a Python microservice application following a layered architecture.
+Stack: Python 3.11, FastAPI, SQLAlchemy, Alembic, pytest, Poetry.
+Repository has automated CI/CD via Jenkins with SAST scanning and policy gates.
+
+---
+
+## ? SECURITY RULES - ALWAYS ENFORCE
+
+### Credential Safety
+- NEVER write hardcoded credentials, API keys, tokens, passwords, or secrets
+- Environment variables only: `os.getenv("KEY")` or `settings.KEY` via Pydantic BaseSettings
+- Flag any existing hardcoded secrets you encounter
+- .env files are gitignored - only .env.example with dummy values is committed
+
+### Input Validation
+- ALL API inputs must be validated via Pydantic models - no raw dict access
+- Sanitize all string inputs before database operations
+- Use parameterized SQLAlchemy queries - NEVER raw SQL string formatting
+
+### Output Safety  
+- Log masking: PII fields (email, phone, SSN, card numbers) must be masked in logs
+- API responses must not expose internal stack traces in production mode
+- Use response models (Pydantic) to control what fields are serialized
+
+---
+
+## ? CODE QUALITY STANDARDS
+
+### Python Style
+- PEP 8 compliance is mandatory
+- Type hints on all function parameters and return types
+- Google-style docstrings on all public functions, classes, and modules
+- Max line length: 120 characters
+- Max function length: 50 lines - refactor if exceeded
+
+### Architecture Pattern
+```
+app/
++-- api/          <- FastAPI routers (HTTP layer only)
++-- service/      <- Business logic
++-- repository/   <- Database access layer  
++-- models/       <- SQLAlchemy ORM models
++-- schemas/      <- Pydantic request/response schemas
++-- core/         <- Config, security, dependencies
+```
+- Respect layer boundaries - api/ never calls repository/ directly
+- Inject dependencies via FastAPI Depends() - no module-level singletons
+
+### Error Handling
+- Catch specific exceptions - no bare `except:`
+- Use custom exception classes defined in `app/core/exceptions.py`
+- HTTP errors via FastAPI HTTPException with clear status codes and messages
+
+---
+
+## ? TESTING REQUIREMENTS
+
+- Unit tests for every new function (pytest)
+- Integration tests for every new API endpoint
+- Tests in `app/tests/` mirroring source layout
+- Mock external services - never hit real APIs in tests
+- Assert both happy path and error paths
+
+---
+
+## ? COMMIT DISCIPLINE
+
+- Conventional Commits format: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`
+- One logical change per commit
+- Run `pre-commit run --all-files` before pushing
+- DO NOT push directly to `main` or `develop` - use feature branches only
+
+---
+
+## ? DO NOT
+
+1. Modify `Jenkinsfile`, `docker-compose.yml`, or any file in `monitoring/` or `grafana/`
+2. Add new Python packages without updating `pyproject.toml` with justification comment
+3. Disable linting rules inline without a comment explaining why
+4. Use `print()` - use `import logging; logger = logging.getLogger(__name__)`
+5. Introduce global mutable state
+6. Modify another developer's branch or workspace
+7. Generate code with `TODO` comments without an associated ticket reference
+8. Use `time.sleep()` in production code - use async patterns
+
+---
+
+## ? AI CONTRIBUTION TAGGING
+
+When Cursor generates significant new functions or modules, add this tag:
+```python
+# AI-ASSISTED: Cursor AI | Date: YYYY-MM-DD | Reviewed: [yes/no]
+```
+This is tracked by the Responsible AI metrics pipeline for governance reporting.
+
+---
+
+## [OK] PREFERRED PATTERNS
+
+```python
+# Good - environment config
+from app.core.config import settings
+db_url = settings.DATABASE_URL
+
+# Good - type hints + docstring
+def get_user(user_id: int, db: Session = Depends(get_db)) -> UserResponse:
+    """Retrieve a user by ID.
+    
+    Args:
+        user_id: The unique identifier of the user.
+        db: Database session injected by FastAPI.
+    
+    Returns:
+        UserResponse schema with user data.
+    
+    Raises:
+        HTTPException: 404 if user not found.
+    """
+
+# Good - specific exception handling
+try:
+    user = user_service.get_by_id(user_id)
+except UserNotFoundError:
+    raise HTTPException(status_code=404, detail="User not found")
+except DatabaseError as e:
+    logger.error("DB error fetching user %s: %s", user_id, e)
+    raise HTTPException(status_code=500, detail="Internal server error")
+```

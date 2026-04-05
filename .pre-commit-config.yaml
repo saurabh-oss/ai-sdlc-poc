@@ -1,0 +1,69 @@
+repos:
+  # -- Standard file hygiene -------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: detect-private-key
+      - id: no-commit-to-branch
+        args: ['--branch', 'main', '--branch', 'master', '--branch', 'develop']
+
+  # -- Secret detection ------------------------------------------
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: \.env\.example$
+
+  # -- Python formatting -----------------------------------------
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3.11
+        args: ['--line-length=120']
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--profile=black', '--line-length=120']
+
+  # -- Linting ---------------------------------------------------
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=120', '--extend-ignore=E203,W503']
+
+  # -- AI Policy check (local, fast) ----------------------------
+  - repo: local
+    hooks:
+      - id: ai-policy-check
+        name: AI Policy Compliance
+        entry: python scripts/ai_policy_check.py --branch HEAD
+        language: python
+        pass_filenames: false
+        stages: [commit]
+
+      - id: conventional-commit
+        name: Conventional Commit Message
+        entry: python -c "
+import sys, re
+msg = open(sys.argv[1]).read().splitlines()[0]
+pattern = r'^(feat|fix|chore|docs|refactor|test|ci|style|perf|build|revert)(\(.+\))?: .{1,100}$'
+if not re.match(pattern, msg):
+    print(f'ERROR: Commit message does not follow Conventional Commits.')
+    print(f'  Got: {msg}')
+    print(f'  Expected: feat|fix|chore|...: description')
+    sys.exit(1)
+"
+        language: python
+        stages: [commit-msg]

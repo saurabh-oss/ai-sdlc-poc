@@ -1,0 +1,77 @@
+{
+  "claude_code_settings": {
+    "version": "1.0",
+    "workspace": "ai-sdlc-dev1",
+    "developer_id": "dev1",
+
+    "permissions": {
+      "allow_file_operations": true,
+      "allow_bash_commands": true,
+      "allow_network_requests": false,
+      "allow_env_file_read": false,
+      "require_confirmation_for": [
+        "file_delete",
+        "git_push",
+        "git_force_push",
+        "install_package",
+        "environment_variable_write"
+      ]
+    },
+
+    "blocked_commands": [
+      "rm -rf /",
+      "sudo",
+      "chmod 777",
+      "curl | bash",
+      "wget | sh",
+      "eval",
+      "git push --force origin main",
+      "git push --force origin master"
+    ],
+
+    "allowed_git_operations": {
+      "branches": {
+        "push_allowed": ["feat/dev1-*", "fix/dev1-*"],
+        "push_blocked": ["main", "master", "release/*"],
+        "create_allowed": true
+      },
+      "commit_message_pattern": "^(feat|fix|refactor|test|docs|chore)(\\(.+\\))?: .{10,}$",
+      "require_signed_commits": false
+    },
+
+    "code_generation": {
+      "add_ai_metadata_comments": true,
+      "metadata_format": "# AI-GENERATED: claude-code | dev1 | {timestamp}",
+      "require_type_hints": true,
+      "require_docstrings": true,
+      "max_function_length_lines": 50,
+      "suggest_tests_for_new_functions": true
+    },
+
+    "security_scanning": {
+      "run_detect_secrets_on_generation": true,
+      "warn_on_hardcoded_strings_matching": [
+        "password",
+        "secret",
+        "api_key",
+        "token",
+        "bearer",
+        "private_key"
+      ],
+      "block_patterns": [
+        "verify=False",
+        "ssl_verify=False",
+        "check_hostname=False",
+        "ALLOW_ALL_ORIGINS=True"
+      ]
+    },
+
+    "audit_logging": {
+      "enabled": true,
+      "log_file": ".claude/audit.log",
+      "log_prompts": true,
+      "log_generated_code_hashes": true,
+      "log_file_modifications": true
+    }
+  }
+}
