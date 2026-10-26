@@ -49,7 +49,7 @@ def run_test_generation(source_dir: str, output_dir: str):
         sys.exit(1)
 
     llm = LLM(
-        model="anthropic/claude-3-5-sonnet-20241022",
+        model="anthropic/claude-opus-5-5",
         temperature=0.1,
         api_key=api_key
     )

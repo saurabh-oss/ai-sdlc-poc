@@ -55,7 +55,7 @@ def run_review(branch: str, output_path: str, score_file: str):
         sys.exit(0)
 
     llm = LLM(
-        model="anthropic/claude-3-5-sonnet-20241022",
+        model="anthropic/claude-opus-5-5",
         temperature=0.2,
         api_key=api_key
     )
