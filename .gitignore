@@ -63,3 +63,8 @@ reports/*.md
 
 # Claude audit log (local only)
 .claude/audit.log
+
+# Local runtime logs and rendered dashboard captures
+reports/*.log
+reports/*.log.out
+reports/screenshots/
